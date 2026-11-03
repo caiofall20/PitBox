@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.SUPABASE_URL || '';
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+// Aceita a chave clássica (service_role) ou a nova (sb_secret_...)
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';
 export const storageBucket = process.env.SUPABASE_STORAGE_BUCKET || 'pitbox-photos';
 export const useObjectStorage = Boolean(url && key);
 
