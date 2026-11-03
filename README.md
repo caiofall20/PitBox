@@ -4,12 +4,12 @@ Gerenciador de coleção de miniaturas (Hot Wheels, Matchbox, Jada, Tomica…) c
 
 ```
 pitbox/
-├─ backend/     API Node + Express + PostgreSQL (migrations, seed, uploads, JWT, perfis)
-├─ frontend/    App React + Vite (todas as telas, scan no aparelho, editor de foto)
-├─ docs/        Arquitetura, mapa de telas e o protótipo original (design-reference/)
-├─ docker-compose.yml       Produção: banco + API + front + HTTPS (Caddy)
-├─ docker-compose.dev.yml   Desenvolvimento: só o banco
-├─ Caddyfile
+├─ api/         Entrada serverless da Vercel (Express)
+├─ backend/     API Node + Express + PostgreSQL (migrations, seed, uploads, JWT)
+├─ frontend/    App React + Vite
+├─ docs/        Arquitetura e telas
+├─ vercel.json  Deploy front+API na Vercel
+├─ docker-compose.yml / docker-compose.dev.yml / Caddyfile
 └─ .env.example
 ```
 
@@ -33,5 +33,5 @@ Entre com o `ADMIN_EMAIL` / `ADMIN_PASSWORD` do `.env` do backend.
 
 ## Produção
 
+- **Grátis (Supabase + Vercel, front+API):** [DEPLOY.md](DEPLOY.md) (opção B) — `vercel.json` + `api/`.
 - **VPS com Docker:** [DEPLOY.md](DEPLOY.md) (opção A).
-- **Grátis (Supabase + Render + Vercel):** [DEPLOY.md](DEPLOY.md) (opção B) — arquivos `render.yaml` e `frontend/vercel.json` já inclusos.

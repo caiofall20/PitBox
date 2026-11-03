@@ -36,61 +36,62 @@ docker run --rm -v pitbox_uploads:/u -v "$PWD":/b alpine tar czf /b/uploads-$(da
 ```
 Agende com `cron` diariamente e copie para fora do servidor.
 
-## Opção B — Stack gratuita (Supabase + Render + Vercel)
+## Opção B — Stack gratuita (Supabase + Vercel) · recomendada sem VPS
 
-Ideal para testar sem VPS. Stack recomendada: **Supabase (Postgres + Storage) + Render (API) + Vercel (front)**.
+Tudo num lugar: **front + API na Vercel**, **banco + fotos no Supabase**.  
+Arquivos: `vercel.json`, `api/index.js` (Express serverless).
 
-Limites reais do Free (mesmo com Storage):
-- Render: API “dorme” após ~15 min ociosos (~1 min para acordar).
-- Supabase: pausa o projeto após 1 semana sem uso; 500 MB de banco + **1 GB de fotos** no Storage.
+Limites do Free:
+- Vercel: cold start na 1ª chamada da API; timeout das functions.
+- Supabase: pausa após ~1 semana sem uso; 500 MB de banco + 1 GB de Storage.
+- Fotos ficam no Supabase Storage (não no disco da Vercel).
 
-### O que eram as “fotos apagadas”?
+### 1. Supabase (já pode estar pronto)
 
-Só as fotos que o usuário **envia** (garagem, cadastro, catálogo). Se ficassem no disco da Render Free, sumiam em todo restart/redeploy/spin-down. **Com Supabase Storage isso não acontece mais** — o código grava no bucket quando `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` estão definidos.
+1. Projeto em [supabase.com](https://supabase.com).
+2. Extensions → `pg_trgm`.
+3. **Connect → Session pooler** (IPv4) → URI em `DATABASE_URL` + `DATABASE_SSL=true`.  
+   Evite Direct `db.*` se sua rede não tem IPv6; evite Transaction pooler.
+4. **Settings → API**: `SUPABASE_URL` + secret (`SUPABASE_SECRET_KEY` ou `service_role`).
+5. Rode **uma vez** no seu PC (contra o Supabase):
+   ```bash
+   cd backend && npm run migrate && npm run seed
+   ```
+   (Na Vercel a API **não** roda migrate a cada request.)
 
-### 1. Supabase (Free) — banco + fotos
+### 2. Vercel — front + API
 
-1. Crie um projeto em [supabase.com](https://supabase.com).
-2. **Database → Extensions** → ative **pg_trgm** (ou deixe a migration criar).
-3. **Project Settings → Database → Connection string → URI**.
-   - Use conexão **direta** (porta `5432`) ou **Session** pooler.
-   - Evite Transaction pooler com este backend.
-4. **Project Settings → API**: copie **Project URL** e a chave **`service_role`** (secret — só no backend).
-5. Opcional: em **Storage**, crie o bucket público `pitbox-photos`. Se não criar, a API cria sozinha na primeira subida.
+1. Push do repo (raiz = pasta `pitbox/` com `vercel.json` e `api/`).
+2. Em [vercel.com](https://vercel.com): **Add New Project** → importe o GitHub.
+3. **Root Directory:** deixe a raiz do `pitbox` (não escolha só `frontend/`).
+4. Environment Variables (Production):
 
-### 2. API — Render (Free)
+| Nome | Valor |
+|------|--------|
+| `DATABASE_URL` | URI Session pooler do Supabase |
+| `DATABASE_SSL` | `true` |
+| `JWT_SECRET` | frase longa (≥24 chars) |
+| `SUPABASE_URL` | `https://xxxx.supabase.co` |
+| `SUPABASE_SECRET_KEY` | secret do Supabase |
+| `SUPABASE_STORAGE_BUCKET` | `pitbox-photos` |
+| `APP_URL` | `https://seu-projeto.vercel.app` (depois do 1º deploy, ajuste) |
+| `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` | só se for re-seed local; produção já tem admin do seed |
+| `CORS_ORIGIN` | opcional no mesmo domínio; local ainda usa `http://localhost:5173` |
 
-Arquivo pronto: `render.yaml` na raiz do `pitbox/`.
+Não defina `VITE_API_URL` (front e API no mesmo domínio).
 
-1. Suba o código para um repositório Git (GitHub) com a pasta `pitbox` na raiz do repo **ou** aponte o Root Directory.
-2. Em [render.com](https://render.com): **New → Blueprint** → selecione o repo.
-3. Preencha as env vars:
-   - `DATABASE_URL` = URI do Postgres  
-   - `SUPABASE_URL` = Project URL  
-   - `SUPABASE_SERVICE_ROLE_KEY` = service_role  
-   - `CORS_ORIGIN` / `APP_URL` = URL da Vercel (pode preencher depois)  
-   - `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD`  
-   - `JWT_SECRET` é gerado pelo Blueprint; `DATABASE_SSL=true` já vem no YAML  
-4. Após o deploy, anote a URL (ex. `https://pitbox-api.onrender.com`). O `npm start` roda migrate + seed. No log deve aparecer `Storage: bucket pitbox-photos (Supabase)`.
+5. Deploy. Teste `https://seu-projeto.vercel.app/api/health` → `{"ok":true}`.
+6. Atualize `APP_URL` (e Google OAuth, se usar) com a URL final.
 
-### 3. Front — Vercel (Free)
+### Opção B2 — Render + Vercel (legado)
 
-Arquivo pronto: `frontend/vercel.json` (SPA rewrite).
-
-1. Em [vercel.com](https://vercel.com): importe o repo.
-2. **Root Directory:** `frontend` (ou `pitbox/frontend` se o monorepo for o pai).
-3. Build: `npm run build` · Output: `dist`.
-4. `VITE_API_URL` = `https://pitbox-api.onrender.com` (sem barra no final).
-5. Deploy → volte na Render e ajuste `CORS_ORIGIN` + `APP_URL` → **Manual Deploy** na API.
+Se preferir API sempre quente: use `render.yaml` + front na Vercel com `VITE_API_URL` apontando para a Render. Ver histórico do repo / comentários no `render.yaml`.
 
 ## Opção C — Outros serviços gerenciados
 
-- **Banco:** Neon ou Supabase (Postgres com `pg_trgm`). `DATABASE_URL` + `DATABASE_SSL=true`.
-- **API:** Render, Railway ou Fly.io apontando para `backend/` (Dockerfile incluso). Variáveis: as mesmas do `backend/.env.example`.
-  - Fotos: monte um volume persistente (Railway/Fly pago) ou storage S3 compatível.
-- **Front:** Netlify, Vercel ou Cloudflare Pages com raiz `frontend/`, build `npm run build`, saída `dist`.
-  - `VITE_API_URL=https://sua-api.onrender.com` e, na API, `CORS_ORIGIN=https://seu-front.vercel.app`.
-  - Netlify: `frontend/public/_redirects` já incluso. Vercel: `frontend/vercel.json` já incluso.
+- **Banco:** Neon ou Supabase. `DATABASE_URL` + `DATABASE_SSL=true`.
+- **API:** Render, Railway ou Fly.io (`backend/`).
+- **Front:** Netlify/Vercel/Pages com `VITE_API_URL` da API.
 
 ## Checklist antes de abrir para o público
 - [ ] `JWT_SECRET` longo e único; senhas fortes no `.env` (nunca no git).
