@@ -1,0 +1,15 @@
+{
+  "name": "Pitbox",
+  "short_name": "Pitbox",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef0f3",
+  "theme_color": "#121317",
+  "icons": [
+    {
+      "src": "/assets/sem-foto.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

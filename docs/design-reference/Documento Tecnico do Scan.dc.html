@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<script src="./doc-page.js"></script>
+<style>
+body{margin:0;font-family:'Archivo',sans-serif;color:#17181c}
+a{color:#b3170f}
+a:hover{color:#7d0f0a}
+doc-page:not(:defined){visibility:hidden}
+</style>
+</helmet>
+<doc-page margin="0.75in">
+  <div style="font-family:'Archivo',sans-serif; font-size:15px; line-height:1.62; color:#17181c">
+    <div aria-hidden="true" style="width:64px; height:22px; background:#c81e16; clip-path:polygon(0 0,22% 0,50% 60%,78% 0,100% 0,50% 100%); margin-bottom:14px"></div>
+    <h1 style="font-family:'Michroma',sans-serif; font-weight:400; font-size:26px; line-height:1.25; text-transform:uppercase; margin:0 0 8px">Pitbox — reconhecimento de miniaturas no scan</h1>
+    <p style="margin:0 0 28px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:#5b606b">Documento técnico · versão 1 · outubro de 2026</p>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">1. Objetivo e premissas</h2>
+    <p style="margin:0 0 10px">O scan identifica uma miniatura a partir de uma foto, preenche o cadastro e verifica se o usuário já tem o modelo. A solução segue três premissas:</p>
+    <ul style="margin:0 0 10px; padding-left:22px">
+      <li>Sem serviços pagos e sem cota de uso: todos os modelos são abertos e rodam em infraestrutura própria ou no aparelho do usuário.</li>
+      <li>Banco de dados PostgreSQL, com as extensões <code style="font-family:'JetBrains Mono',monospace; font-size:13px">pgvector</code> e <code style="font-family:'JetBrains Mono',monospace; font-size:13px">pg_trgm</code>.</li>
+      <li>Nenhum treinamento é necessário para começar. A precisão cresce com as fotos aprovadas pela moderação.</li>
+    </ul>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">2. Fluxo do scan</h2>
+    <p style="margin:0 0 10px">Cada etapa só roda se a anterior não tiver resolvido a identificação com confiança suficiente.</p>
+    <ol style="margin:0 0 10px; padding-left:22px">
+      <li><strong>Código de barras.</strong> Se a foto mostra a cartela, o código é lido e buscado em <code style="font-family:'JetBrains Mono',monospace; font-size:13px">catalogo_modelos.codigo_barras</code>. Encontrou: confiança 100%.</li>
+      <li><strong>Recorte.</strong> O fundo é removido para que a comparação considere só o carrinho.</li>
+      <li><strong>Embedding da imagem.</strong> Um modelo de visão converte a foto em um vetor de 384 números.</li>
+      <li><strong>Busca por similaridade.</strong> O vetor é comparado com as fotos aprovadas do catálogo (identificação) e com os itens do próprio usuário (duplicata).</li>
+      <li><strong>Leitura de texto.</strong> O OCR lê nome e série impressos na cartela e reforça ou corrige o resultado da imagem.</li>
+      <li><strong>Pontuação.</strong> Os sinais viram uma confiança por campo, exibida na tela de revisão.</li>
+    </ol>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">3. Componentes e licenças</h2>
+    <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin:6px 0 6px">
+      <thead>
+        <tr>
+          <th style="text-align:left; padding:8px 10px 8px 0; border-bottom:2px solid #17181c">Etapa</th>
+          <th style="text-align:left; padding:8px 10px; border-bottom:2px solid #17181c">Ferramenta</th>
+          <th style="text-align:left; padding:8px 10px; border-bottom:2px solid #17181c">Licença</th>
+          <th style="text-align:left; padding:8px 0 8px 10px; border-bottom:2px solid #17181c">Onde roda</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Código de barras</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">ZXing ou BarcodeDetector do navegador</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">Apache 2.0 / nativo</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Aparelho</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Recorte</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">rembg (U²-Net)</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">MIT / Apache 2.0</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Servidor</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Embedding</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">DINOv2 ViT-S/14 (versão ONNX)</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">Apache 2.0</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Aparelho (Transformers.js) ou servidor (ONNX Runtime)</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">OCR</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">Tesseract ou PaddleOCR</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">Apache 2.0</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Aparelho (tesseract.js) ou servidor</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Busca vetorial</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">pgvector (índice HNSW)</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">PostgreSQL License</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Banco</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Texto aproximado</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">pg_trgm</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">PostgreSQL License</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Banco</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:6px 0 10px; font-size:13px; color:#5b606b">Tabela 1. Todas as licenças permitem uso comercial sem abrir o código do Pitbox. DINOv2 foi escolhido por distinguir bem detalhes visuais finos, como pintura e rodas.</p>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">4. Modelo de dados</h2>
+    <pre style="margin:6px 0 4px; padding:14px 16px; background:#f3f4f7; border:1px solid #d6dae1; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.55; white-space:pre-wrap">create extension if not exists vector;
+create extension if not exists pg_trgm;
+
+create type perfil as enum ('colecionador','moderador','admin');
+
+create table usuarios (
+  id uuid primary key default gen_random_uuid(),
+  nome text not null, email text unique not null,
+  perfil perfil not null default 'colecionador',
+  ativo boolean not null default true,
+  criado_em timestamptz not null default now()
+);
+
+create table catalogo_modelos (
+  id uuid primary key default gen_random_uuid(),
+  marca text not null, modelo text not null, ano int,
+  serie text, escala text, codigo_barras text unique,
+  status text not null default 'pendente',     -- pendente | aprovado
+  enviado_por uuid references usuarios(id)
+);
+
+create table catalogo_fotos (
+  id uuid primary key default gen_random_uuid(),
+  modelo_id uuid not null references catalogo_modelos(id),
+  url text not null, embedding vector(384) not null,
+  status text not null default 'pendente',     -- pendente | aprovada | rejeitada
+  enviada_por uuid references usuarios(id),
+  revisada_por uuid references usuarios(id)
+);
+
+create table itens (
+  id uuid primary key default gen_random_uuid(),
+  usuario_id uuid not null references usuarios(id),
+  modelo_id uuid references catalogo_modelos(id),
+  numero int not null, preco_pago numeric(10,2),
+  foto_url text, embedding vector(384),
+  criado_em timestamptz not null default now()
+);
+
+create table desejos (
+  usuario_id uuid references usuarios(id),
+  modelo_id uuid references catalogo_modelos(id),
+  primary key (usuario_id, modelo_id)
+);
+
+create index on catalogo_fotos using hnsw (embedding vector_cosine_ops);
+create index on itens using hnsw (embedding vector_cosine_ops);
+create index on catalogo_modelos using gin (modelo gin_trgm_ops);</pre>
+    <p style="margin:6px 0 10px; font-size:13px; color:#5b606b">Código 1. Esquema mínimo. Fotos ficam no sistema de arquivos do servidor ou em um bucket compatível com S3; o banco guarda só a URL.</p>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">5. Consultas do scan</h2>
+    <p style="margin:0 0 10px">Identificação no catálogo, usando apenas fotos aprovadas:</p>
+    <pre style="margin:6px 0 10px; padding:14px 16px; background:#f3f4f7; border:1px solid #d6dae1; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.55; white-space:pre-wrap">select m.id, m.marca, m.modelo, m.ano, m.serie, m.escala,
+       1 - (f.embedding &lt;=&gt; $1) as similaridade
+from catalogo_fotos f
+join catalogo_modelos m on m.id = f.modelo_id
+where f.status = 'aprovada'
+order by f.embedding &lt;=&gt; $1
+limit 5;</pre>
+    <p style="margin:0 0 10px">Verificação de duplicata na coleção do usuário. Se o modelo já foi identificado, a comparação por <code style="font-family:'JetBrains Mono',monospace; font-size:13px">modelo_id</code> basta; a busca por vetor cobre itens cadastrados sem vínculo com o catálogo:</p>
+    <pre style="margin:6px 0 10px; padding:14px 16px; background:#f3f4f7; border:1px solid #d6dae1; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.55; white-space:pre-wrap">select id, numero, 1 - (embedding &lt;=&gt; $1) as similaridade
+from itens
+where usuario_id = $2
+  and (modelo_id = $3 or embedding &lt;=&gt; $1 &lt; 0.15)
+order by embedding &lt;=&gt; $1
+limit 3;</pre>
+    <p style="margin:0 0 10px">Reforço pelo texto lido na cartela:</p>
+    <pre style="margin:6px 0 10px; padding:14px 16px; background:#f3f4f7; border:1px solid #d6dae1; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.55; white-space:pre-wrap">select id, modelo, similarity(modelo, $1) as sim_texto
+from catalogo_modelos
+where status = 'aprovado' and modelo % $1
+order by sim_texto desc
+limit 5;</pre>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">6. Pontuação e confiança</h2>
+    <p style="margin:0 0 10px">Para cada candidato, a confiança combina os sinais disponíveis. Os pesos abaixo são o ponto de partida e devem ser calibrados com scans reais:</p>
+    <pre style="margin:6px 0 10px; padding:14px 16px; background:#f3f4f7; border:1px solid #d6dae1; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.55; white-space:pre-wrap">se código de barras encontrado:  confiança = 1.00
+senão: confiança = 0.65 × sim_imagem + 0.35 × sim_texto
+       (sem texto legível: confiança = sim_imagem)</pre>
+    <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin:6px 0 10px">
+      <thead><tr><th style="text-align:left; padding:8px 10px 8px 0; border-bottom:2px solid #17181c">Confiança</th><th style="text-align:left; padding:8px 10px; border-bottom:2px solid #17181c">Na tela de revisão</th><th style="text-align:left; padding:8px 0 8px 10px; border-bottom:2px solid #17181c">Comportamento</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">≥ 90%</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">Selo “Lido”</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Campo preenchido sem destaque</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">75–89%</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">Selo amarelo “Confira”</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Campo preenchido e destacado</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">&lt; 75%</td><td style="padding:8px 10px; border-bottom:1px solid #d6dae1">Sem sugestão</td><td style="padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Mostra os 3 candidatos mais próximos ou cadastro manual</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:0 0 10px">O preço pago nunca é inferido; o campo sempre pede preenchimento manual.</p>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">7. Perfis e permissões</h2>
+    <table style="width:100%; border-collapse:collapse; font-size:13.5px; margin:6px 0 10px">
+      <thead><tr><th style="text-align:left; padding:8px 10px 8px 0; border-bottom:2px solid #17181c">Ação</th><th style="text-align:center; padding:8px 10px; border-bottom:2px solid #17181c">Colecionador</th><th style="text-align:center; padding:8px 10px; border-bottom:2px solid #17181c">Moderador</th><th style="text-align:center; padding:8px 0 8px 10px; border-bottom:2px solid #17181c">Admin</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Gerenciar a própria coleção e lista de desejos</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">Sim</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">Sim</td><td style="text-align:center; padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Sim</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Enviar modelos e fotos ao catálogo</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">Sim</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">Sim</td><td style="text-align:center; padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Sim</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Aprovar, mesclar ou rejeitar envios</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">—</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">Sim</td><td style="text-align:center; padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Sim</td></tr>
+        <tr><td style="padding:8px 10px 8px 0; border-bottom:1px solid #d6dae1">Alterar perfil e suspender usuários</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">—</td><td style="text-align:center; padding:8px 10px; border-bottom:1px solid #d6dae1">—</td><td style="text-align:center; padding:8px 0 8px 10px; border-bottom:1px solid #d6dae1">Sim</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:0 0 10px">As regras ficam no próprio banco com Row Level Security, para que nenhuma tela ou API consiga contorná-las:</p>
+    <pre style="margin:6px 0 10px; padding:14px 16px; background:#f3f4f7; border:1px solid #d6dae1; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.55; white-space:pre-wrap">alter table itens enable row level security;
+create policy itens_do_dono on itens
+  using (usuario_id = current_setting('app.usuario_id')::uuid);
+
+alter table catalogo_fotos enable row level security;
+create policy moderar_fotos on catalogo_fotos for update
+  using (exists (select 1 from usuarios u
+                 where u.id = current_setting('app.usuario_id')::uuid
+                   and u.perfil in ('moderador','admin')));</pre>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">8. Moderação e aprendizado contínuo</h2>
+    <ol style="margin:0 0 10px; padding-left:22px">
+      <li>O colecionador salva uma miniatura. Se o modelo não existe no catálogo, nasce um <code style="font-family:'JetBrains Mono',monospace; font-size:13px">catalogo_modelos</code> pendente; a foto vira um <code style="font-family:'JetBrains Mono',monospace; font-size:13px">catalogo_fotos</code> pendente.</li>
+      <li>A fila de moderação mostra o envio com a sugestão mais parecida já aprovada. Acima de 90% de similaridade, o moderador vê o botão “Mesclar com existente”, que evita modelos duplicados com nomes diferentes.</li>
+      <li>Fotos aprovadas passam a participar da busca imediatamente. Não há retreino: o índice vetorial é atualizado na inserção.</li>
+      <li>Quando o usuário corrige um campo sugerido, a correção é registrada e entra na fila como sinal de qualidade daquela foto de referência.</li>
+    </ol>
+    <p style="margin:0 0 10px">Se depois de alguns milhares de fotos aprovadas a precisão ainda não for suficiente, é possível treinar uma camada de classificação sobre os embeddings do DINOv2, sem placa de vídeo dedicada.</p>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">9. Mobile</h2>
+    <p style="margin:0 0 10px"><strong>Fase 1 — PWA.</strong> O mesmo app web é instalável na tela inicial. A câmera é acessada pelo navegador, e código de barras, embedding e OCR podem rodar no próprio aparelho com WebAssembly ou WebGPU. Um único código atende Android, iOS e desktop.</p>
+    <p style="margin:0 0 10px"><strong>Fase 2 — app nativo (opcional).</strong> Com Expo (React Native) e ONNX Runtime Mobile, o mesmo modelo roda mais rápido e funciona sem conexão. A interface da fase 1 serve de base.</p>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">10. Hospedagem sem custo de uso</h2>
+    <ul style="margin:0 0 10px; padding-left:22px">
+      <li>PostgreSQL com pgvector em Docker, em servidor próprio ou em uma VM gratuita.</li>
+      <li>Com o embedding calculado no aparelho, o servidor só recebe o vetor e executa a busca, o que mantém a carga baixa.</li>
+      <li>Um serviço Python (FastAPI + ONNX Runtime) fica como alternativa para aparelhos sem desempenho suficiente.</li>
+    </ul>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">11. Riscos e cuidados</h2>
+    <ul style="margin:0 0 10px; padding-left:22px">
+      <li><strong>Licenças.</strong> Evitar o YOLO da Ultralytics, que é AGPL e obrigaria a abrir o código do produto. Para detecção de objetos, usar RT-DETR (Apache 2.0).</li>
+      <li><strong>Imagens de referência.</strong> Formar o catálogo com fotos dos próprios usuários. Coletar imagens de lojas ou sites pode violar os termos de uso deles.</li>
+      <li><strong>Início lento.</strong> Com o catálogo vazio, o reconhecimento depende do OCR. Moderadores podem fotografar suas coleções para criar a base inicial.</li>
+      <li><strong>LGPD.</strong> Fotos e e-mails são dados pessoais: registrar consentimento e apagar os dados quando a conta for excluída.</li>
+    </ul>
+
+    <h2 style="font-size:19px; font-weight:800; margin:28px 0 8px">12. Próximos passos</h2>
+    <ol style="margin:0 0 10px; padding-left:22px">
+      <li>Subir o banco com o esquema da seção 4 e as políticas da seção 7.</li>
+      <li>Implementar código de barras e OCR, que já funcionam sem catálogo.</li>
+      <li>Integrar o DINOv2 no navegador e a busca vetorial.</li>
+      <li>Abrir a moderação e formar a base com os primeiros moderadores.</li>
+      <li>Calibrar os pesos da seção 6 com os primeiros scans reais.</li>
+    </ol>
+  </div>
+</doc-page>
+</x-dc>
+</body>
+</html>

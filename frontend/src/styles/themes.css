@@ -1,0 +1,49 @@
+/* Pinturas do app.
+   Escala de cores: --k* = fundos e linhas (do mais escuro ao mais claro no tema escuro), --t* = textos.
+   Largada (preto/vermelho) é o padrão escuro, Mascarado é escuro com amarelo e Relâmpago é o tema claro.
+   .force-dark mantém peças com foto escura (hero do Mach 5) sempre no visual escuro. */
+*{box-sizing:border-box}
+input::placeholder{color:var(--t4)}
+[data-theme],.force-dark{
+  --k0:#0A0A0C;--k1:#101013;--kin:#0F0F12;--k2:#141418;--k3:#18181D;--k4:#1D1D23;--k5:#222228;--k6:#2A2A31;--k7:#3A3A42;--k8:#4A4A54;
+  --t0:#F4F3F1;--t1:#E4E2E6;--t2:#B9B7BD;--t3:#9B99A0;--t4:#77757D;
+  --yel:#FFC93C;--coral:#FF6B5E;--green:#5FD38D;--glass:rgba(10,10,12,.85);--glass2:rgba(17,17,21,.94);
+  --bg:var(--k0);--bg2:var(--k1);--surface:var(--k2);--surface2:var(--k4);--ink:var(--t0);--muted:var(--t3);--line:var(--k6);--line-strong:var(--k7);
+  --body:var(--k2);--body-ink:var(--t0);--body-muted:var(--t2);--input:var(--k2);--focus:var(--yel);--focus-ring:rgba(255,201,60,.16);--asphalt:var(--k0);
+  /* menu lateral: tons exatos do PitBox Desktop */
+  --nav-hover:#1A1A1F;--nav-active:#1C1C22;--nav-ico:#18181D;--nav-txt:#C9C7CD;--nav-count:#1F1F25}
+.force-dark{--accent-text:#FFC93C;--hi:#FFC93C;color:var(--t0)}
+[data-theme="largada"]{--accent:#D7261E;--accent-ink:#FFFFFF;--accent-glow:rgba(215,38,30,.35);--accent-soft:rgba(215,38,30,.22);--accent-text:#FFC93C;--hi:#FFC93C;--roundel:#D7261E;--roundel-ink:#FFC93C}
+[data-theme="mascarado"]{--accent:#F5B800;--accent-ink:#0A0A0C;--accent-glow:rgba(245,184,0,.3);--accent-soft:rgba(245,184,0,.2);--accent-text:#FF6B5E;--hi:#FF6B5E;--roundel:#F5B800;--roundel-ink:#0A0A0C}
+[data-theme="relampago"]{
+  --k0:#F3F2EF;--k1:#FFFFFF;--kin:#FFFFFF;--k2:#FFFFFF;--k3:#F6F5F2;--k4:#EFEDE9;--k5:#E7E4DF;--k6:#DDD9D3;--k7:#C9C4BC;--k8:#A9A39A;
+  --t0:#141418;--t1:#2B2A30;--t2:#55535B;--t3:#6F6D75;--t4:#8C8990;
+  --yel:#9A6200;--coral:#C42B1F;--green:#1E8E4E;--glass:rgba(243,242,239,.88);--glass2:rgba(255,255,255,.95);--focus-ring:rgba(215,38,30,.18);
+  --accent:#D7261E;--accent-ink:#FFFFFF;--accent-glow:rgba(215,38,30,.28);--accent-soft:rgba(215,38,30,.12);--accent-text:#B3170F;--hi:#B3170F;--roundel:#D7261E;--roundel-ink:#FFFFFF;
+  --focus:#D7261E;color-scheme:light;
+  --nav-hover:#F2F0EC;--nav-active:#ECE9E4;--nav-ico:#F3F1EE;--nav-txt:#2B2A30;--nav-count:#ECE9E4}
+[data-theme="relampago"] .force-dark{color-scheme:dark}
+@keyframes pbin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pbfade{from{opacity:0}to{opacity:1}}
+@keyframes pbstreak{from{transform:translateX(0)}to{transform:translateX(420%)}}
+@keyframes pbfloat{0%,100%{transform:translateY(0) scale(1.02)}50%{transform:translateY(-8px) scale(1.04)}}
+@keyframes pbscan{from{top:8%}to{top:90%}}
+@keyframes pbpulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pblight{to{background:#e0241c;box-shadow:0 0 24px #e0241c}}
+@keyframes pbgo{to{background:#22c55e;box-shadow:0 0 24px #22c55e}}
+@keyframes pbdrive{0%{transform:translateX(-130%) skewX(-6deg)}45%{transform:translateX(10%) skewX(-2deg)}55%{transform:translateX(30%) skewX(-2deg)}100%{transform:translateX(190%) skewX(-8deg)}}
+@keyframes pbchev{from{opacity:0;transform:translateX(-70px) skewX(-25deg)}to{opacity:1;transform:none}}
+@keyframes pbspin{from{opacity:0;transform:rotateY(100deg) scale(.6)}to{opacity:1;transform:none}}
+@keyframes pbpop{0%{opacity:0;transform:scale(.92)}60%{opacity:1;transform:scale(1.02)}100%{transform:none}}
+@keyframes pbshake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes pbrev{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,-1px)}}
+@keyframes pbaway{0%{transform:translate(0,0) scale(1) rotate(-8deg);filter:blur(0)}20%{transform:translate(4%,3%) scale(1.06) rotate(-8deg);filter:blur(0)}100%{transform:translate(-62%,-58%) scale(.06) rotate(-22deg);filter:blur(3px);opacity:0}}
+@keyframes pbaway2{0%{transform:scale(1.04) translate(0,0);opacity:1}22%{transform:scale(1.1) translate(2%,2.5%);opacity:1}100%{transform:scale(.04) translate(-60%,-70%);opacity:0}}
+@keyframes pbrush{from{transform:translate(0,0)}to{transform:translate(160vmax,90vmax)}}
+@keyframes pbbg{0%{opacity:0}12%{opacity:1}82%{opacity:1}100%{opacity:0}}
+@keyframes pbmsg{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:none}}
+@keyframes pbheartA{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+@keyframes pbheartB{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+@keyframes pbring{0%{box-shadow:0 0 0 0 rgba(246,194,26,.8),0 4px 14px rgba(0,0,0,.45)}100%{box-shadow:0 0 0 16px rgba(246,194,26,0),0 4px 14px rgba(0,0,0,.45)}}
+@keyframes pbstripe{from{background-position:0 0}to{background-position:40px 0}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

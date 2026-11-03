@@ -1,0 +1,36 @@
+[
+  {
+    "toy_code": "JBB36",
+    "brand": "Hot Wheels",
+    "model": "'94 Bugatti EB110 SS",
+    "year": "2025",
+    "series": "HW Race Day",
+    "series_num": "9/10",
+    "col_num": "221/250",
+    "scale": "1:64"
+  },
+  {
+    "brand": "Hot Wheels",
+    "model": "'70 Ford Escort RS1600",
+    "year": "2016",
+    "series": "Fast & Furious",
+    "scale": "1:64",
+    "cast_text": "FORD ESCORT RS1600",
+    "wiki_url": "https://hotwheels.fandom.com/wiki/'70_Ford_Escort_RS1600"
+  },
+  {
+    "brand": "Hot Wheels",
+    "model": "Bassline",
+    "year": "2008",
+    "series": "Teku",
+    "scale": "1:64",
+    "cast_text": "BASSLINE BTM639"
+  },
+  {
+    "brand": "Hot Wheels",
+    "model": "Mach 5",
+    "year": "2008",
+    "series": "Speed Racer",
+    "scale": "1:64"
+  }
+]
