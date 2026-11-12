@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth.jsx';
 import { initial } from '../lib/format.js';
+import InstallApp from '../components/InstallApp.jsx';
 export default function Mais() {
   const { user, logout } = useAuth(), nav = useNavigate();
   const links = [['/desejos', 'Na mira', 'Lista de desejos', 'my_location'], ['/numeros', 'Telemetria', 'Números da coleção', 'monitoring'], ['/escanear?modo=verificar', 'Já tenho essa?', 'Confira antes de comprar', 'fact_check'], ['/cadastro', 'Cadastro manual', 'Digite os dados sem foto', 'edit_note'],
@@ -11,6 +12,7 @@ export default function Mais() {
         <span className="av" aria-hidden="true" style={{ background: 'var(--accent)', color: 'var(--accent-ink)' }}>{initial(user.name)}</span>
         <span style={{ display: 'flex', flexDirection: 'column' }}><strong>{user.name}</strong><span className="muted" style={{ fontSize: 13 }}>{user.handle} · {user.role}</span></span>
       </div>
+      <InstallApp />
       <nav className="rows" aria-label="Mais opções">{links.map(([to, l, s, icon]) => (
         <Link key={to} to={to} className="nav" style={{ minHeight: 60, borderRadius: 0, borderTop: '1px solid var(--k5)' }}>
           <span className="ico" aria-hidden="true"><span className="ms">{icon}</span></span>
