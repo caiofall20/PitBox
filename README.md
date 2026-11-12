@@ -6,7 +6,7 @@ Gerenciador de coleção de miniaturas (Hot Wheels, Matchbox, Jada, Tomica…) c
 pitbox/
 ├─ api/         Entrada serverless da Vercel (Express)
 ├─ backend/     API Node + Express + PostgreSQL (migrations, seed, uploads, JWT)
-├─ frontend/    App React + Vite
+├─ frontend/    App React + Vite (PWA instalável)
 ├─ docs/        Arquitetura e telas
 ├─ vercel.json  Deploy front+API na Vercel
 ├─ docker-compose.yml / docker-compose.dev.yml / Caddyfile
