@@ -17,5 +17,11 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": { "service": "backend" } },
     { "source": "/(.*)", "destination": { "service": "frontend" } }
+  ],
+  "crons": [
+    {
+      "path": "/api/health",
+      "schedule": "0 12 * * *"
+    }
   ]
 }

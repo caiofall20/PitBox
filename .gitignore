@@ -1,4 +1,6 @@
 node_modules
 dist
 .env
+.env.vercel
 backend/uploads
+backend/.env.vercel

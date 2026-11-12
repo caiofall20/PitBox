@@ -45,6 +45,7 @@ Limites do Free:
 - Vercel: cold start na 1ª chamada da API; timeout das functions.
 - Supabase: pausa após ~1 semana sem uso; 500 MB de banco + 1 GB de Storage.
 - Fotos ficam no Supabase Storage (não no disco da Vercel).
+- Keep-alive: `vercel.json` agenda um GET diário em `/api/health` (faz `SELECT 1`) para o projeto Free do Supabase não pausar por inatividade. No Hobby a Vercel só permite cron **1×/dia**.
 
 ### 1. Supabase (já pode estar pronto)
 
